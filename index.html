@@ -16,7 +16,7 @@
       padding: 24px 16px 50px;
       font-family: Arial, sans-serif;
       background: #101522;
-      color: #ffffff;
+      color: #fff;
     }
 
     header {
@@ -45,7 +45,7 @@
       border: 1px solid #303b52;
       border-radius: 20px;
       background: #1a2233;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .2);
     }
 
     .tag {
@@ -125,7 +125,6 @@
 </head>
 
 <body>
-
   <header>
     <h1>My Proxy Hub</h1>
     <p>シンプルなWebランチャー</p>
@@ -158,7 +157,7 @@
     <span class="tag">PROXY 02</span>
     <h2>ProxyOrb</h2>
     <p class="description">
-      URLを入力してProxyOrbを開く
+      URLを入力してProxyOrb経由で開く
     </p>
 
     <form id="proxyorbForm">
@@ -169,17 +168,18 @@
         autocomplete="url"
         required
       >
-      <button type="submit">ProxyOrbを開く ↗</button>
+      <button type="submit">ProxyOrbで開く ↗</button>
     </form>
   </section>
 
   <footer>
     My Proxy Hub<br>
-    URLを入力して各サービスを利用できます。
+    URLを入力して各サービスを利用できます。<br>
     プロキシサービスに個人情報やパスワードを入力しないでください。
   </footer>
 
   <script>
+    // URLの形式を整える
     function normalizeUrl(value) {
       let text = value.trim();
 
@@ -239,37 +239,44 @@
     // ProxyOrb
     document
       .getElementById("proxyorbForm")
-      .addEventListener("submit", async function(event) {
+      .addEventListener("submit", function(event) {
         event.preventDefault();
 
-        let target;
-
         try {
-          target = normalizeUrl(
-            document.getElementById("proxyorbInput").value
+          const target = new URL(
+            normalizeUrl(
+              document.getElementById("proxyorbInput").value
+            )
+          );
+
+          // ProxyOrb用のURLを組み立てる
+          const bytes = new TextEncoder().encode(target.origin);
+          let binary = "";
+
+          for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+          }
+
+          const encoded = btoa(binary);
+
+          const proxyUrl = new URL(
+            target.pathname + target.search,
+            "https://proxyorb.com"
+          );
+
+          proxyUrl.searchParams.set("__pot", encoded);
+          proxyUrl.hash = target.hash;
+
+          window.open(
+            proxyUrl.href,
+            "_blank",
+            "noopener,noreferrer"
           );
         } catch (error) {
           alert("URLを確認してください。");
-          return;
-        }
-
-        // 新しいタブを開き、入力URLをコピーする
-        window.open(
-          "https://proxyorb.com/ja",
-          "_blank"
-        );
-
-        try {
-          await navigator.clipboard.writeText(target);
-          alert(
-            "入力したURLをコピーしました！\n" +
-            "ProxyOrbの入力欄に貼り付けてください。"
-          );
-        } catch (error) {
-          prompt("このURLをコピーしてください：", target);
         }
       });
   </script>
-
 </body>
 </html>
+
