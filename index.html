@@ -1,20 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Web Launcher</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      color: #222;
+      text-align: center;
+      padding: 40px 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 25px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #4263eb;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 14px;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #4263eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #364fc7;
+    }
+
+    p {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>My Web Launcher</h1>
+    <p>開きたいサイトのURLを入力してね</p>
+
+    <form id="urlForm">
+      <input
+        id="siteUrl"
+        type="url"
+        placeholder="https://www.google.com"
+        required
+      >
+
+      <button type="submit">別タブで開く</button>
+    </form>
+  </div>
+
   <script>
-    document.getElementById("urlForm")
-      .addEventListener("submit", function(event) {
-        event.preventDefault();
+    const form = document.getElementById("urlForm");
+    const input = document.getElementById("siteUrl");
 
-        const url = new URL(
-          document.getElementById("siteUrl").value
-        );
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
 
-        if (url.protocol !== "https:" &&
-            url.protocol !== "http:") {
-          alert("HTTPまたはHTTPSのURLを入力してください");
-          return;
-        }
+      let url;
 
-        window.open(url.href, "_blank", "noopener,noreferrer");
-      });
+      try {
+        url = new URL(input.value);
+      } catch (error) {
+        alert("正しいURLを入力してください");
+        return;
+      }
+
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        alert("http:// または https:// から始まるURLを入力してください");
+        return;
+      }
+
+      window.open(url.href, "_blank", "noopener,noreferrer");
+    });
   </script>
 </body>
 </html>
