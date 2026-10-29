@@ -64,17 +64,18 @@
 <body>
   <div class="container">
     <h1>My Web Launcher</h1>
-    <p>開きたいサイトのURLを入力してね</p>
+    <p>開きたいURLを入力してください</p>
 
     <form id="urlForm">
       <input
         id="siteUrl"
-        type="url"
+        type="text"
         placeholder="https://www.google.com"
+        autocomplete="url"
         required
       >
 
-      <button type="submit">別タブで開く</button>
+      <button type="submit">Proxyiumで開く</button>
     </form>
   </div>
 
@@ -85,21 +86,54 @@
     form.addEventListener("submit", function(event) {
       event.preventDefault();
 
-      let url;
+      let value = input.value.trim();
+
+      // URLの先頭を補完
+      if (!/^https?:\/\//i.test(value)) {
+        value = "https://" + value;
+      }
+
+      let targetUrl;
 
       try {
-        url = new URL(input.value);
+        targetUrl = new URL(value);
       } catch (error) {
-        alert("正しいURLを入力してください");
+        alert("URLが正しくありません");
         return;
       }
 
-      if (url.protocol !== "https:" && url.protocol !== "http:") {
-        alert("http:// または https:// から始まるURLを入力してください");
+      if (
+        targetUrl.protocol !== "https:" &&
+        targetUrl.protocol !== "http:"
+      ) {
+        alert("HTTPまたはHTTPSのURLを入力してください");
         return;
       }
 
-      window.open(url.href, "_blank", "noopener,noreferrer");
+      // URLをUTF-8のBase64に変換
+      const bytes = new TextEncoder().encode(targetUrl.href);
+      let binary = "";
+
+      bytes.forEach(function(byte) {
+        binary += String.fromCharCode(byte);
+      });
+
+      const encoded = btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "");
+
+      // ProxyiumのURLを組み立てる
+      const proxyUrl =
+        "https://185.16.38.122/?__cpo=" +
+        encodeURIComponent(encoded);
+
+      // 別タブで開く
+      window.open(
+        proxyUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
     });
   </script>
 </body>
